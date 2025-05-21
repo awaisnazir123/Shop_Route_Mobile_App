@@ -3,7 +3,8 @@ import { ScrollView,View, TextInput, Text, Button, StyleSheet, Alert, TouchableO
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-
+import {styles} from '../styles/editProductForm.style';
+import { BASE_URL } from '../utils/urlConfig';
 const EditProductForm = ({ product}) => {
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState(String(product.price));
@@ -13,39 +14,92 @@ const EditProductForm = ({ product}) => {
   const [images, setImages] = useState([...product.images]);
 
   useEffect(() => {
-    axios.get('http://192.168.0.194:5000/api/category')
-      .then(res => setCategories(res.data))
-      .catch(err => console.log(err));
+    (async () => {
+      const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
+      const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (cameraStatus.status !== 'granted') {
+        Alert.alert('Permission denied', 'We need camera access to take photos.');
+      }
+
+      if (galleryStatus.status !== 'granted') {
+        Alert.alert('Permission denied', 'We need access to your gallery.');
+      }
+    })();
   }, []);
 
-  const handleImagePick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsMultipleSelection: true });
-
-    if (!result.cancelled) {
-      const uri = result.assets[0].uri;
-      const formData = new FormData();
-      formData.append('image', {
-        uri,
-        name: 'upload.jpg',
-        type: 'image/jpeg',
-      });
-
+  useEffect(() => {
+    const fetchCategories = async () => {
       try {
-        const res = await axios.post('http://192.168.0.194:5000/api/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        setImages([...images, res.data.url]);
-      } catch (err) {
-        console.error('Upload error:', err);
-        Alert.alert('Error', 'Image upload failed');
+        const res = await axios.get(`${BASE_URL}/api/category`);
+        setCategories(res.data.response);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        Alert.alert('Error', 'Failed to fetch categories');
       }
+    };
+    fetchCategories();
+  }, []);
+
+const uploadImage = async (uri) => {
+  const fileName = uri.split('/').pop();
+  const match = /\.(\w+)$/.exec(fileName || '');
+  const ext = match ? match[1] : 'jpg';
+  const mimeType = `image/${ext}`;
+
+  const formData = new FormData();
+  formData.append('image', {
+    uri,
+    name: fileName,
+    type: mimeType,
+  });
+
+  try {
+    const res = await axios.post(`${BASE_URL}/api/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    setImages(prev => [...prev, res.data.url]);
+  } catch (err) {
+    console.error('Upload error:', err.response?.data || err.message);
+    Alert.alert('Error', 'Image upload failed');
+  }
+};
+
+
+
+
+const pickFromGallery = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      const selected = result.assets.map((asset) => asset.uri);
+      setImages([...images, ...selected]);
     }
   };
+
+  const takePhoto = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      const photoUri = result.assets[0].uri;
+      setImages([...images, photoUri]);
+    }
+  };
+
 
   const handleDeleteImage = async (imgUrl) => {
     const filename = imgUrl.split('/').pop();
     try {
-      await axios.delete(`http://192.168.0.194:5000/api/upload/${filename}`);
+      
       setImages(images.filter(img => img !== imgUrl));
     } catch (err) {
       console.error('Image delete error:', err);
@@ -54,7 +108,7 @@ const EditProductForm = ({ product}) => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.put(`http://192.168.0.194:5000/api/product/${product._id}`, {
+      const res = await axios.put(`${BASE_URL}/api/product/${product._id}`, {
         name,
         price,
         category,
@@ -119,7 +173,16 @@ const EditProductForm = ({ product}) => {
         ))}
       </View>
 
-      <Button title="Add Image" onPress={handleImagePick} color="#007bff" />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+  <TouchableOpacity style={styles.imagePicker} onPress={pickFromGallery}>
+    <Text style={styles.imagePickerText}>Pick from Gallery</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.imagePicker} onPress={takePhoto}>
+    <Text style={styles.imagePickerText}>Take Photo</Text>
+  </TouchableOpacity>
+</View>
+
+
       
       <View style={ styles.button }>
         <Button style={styles.buttonText} title="Update Product" onPress={handleSubmit} color="green" />
@@ -132,74 +195,5 @@ const EditProductForm = ({ product}) => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-     paddingBottom: 40,
-      paddingHorizontal: 16 
-    },
-
-  label: {
-    marginTop: 12,
-     fontWeight: '600',
-      fontSize: 16
-  },
-
-  input: {
-     borderWidth: 1,
-      borderColor: '#ccc',
-       borderRadius: 10,
-    paddingHorizontal: 12,
-     paddingVertical: 10,
-      fontSize: 16, marginTop: 6,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-     borderColor: '#ccc',
-      borderRadius: 10, 
-      marginTop: 6,
-  },
-
-imagePicker: {
-    marginTop: 10,
-     padding: 12,
-      backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-     alignItems: 'center', 
-     flex: 1, marginHorizontal: 4,
-  },
-
-  imagePickerText: { color: '#333' },
-  imageWrapper: {
-    position: 'relative',
-    marginRight: 10,
-    marginBottom: 10,
-  },
-
-  button: {
-    marginTop: 20, backgroundColor: '#007bff',
-    paddingVertical: 14, borderRadius: 10, alignItems: 'center',
-  },
-buttonText: {
-   color: '#fff',
-    fontSize: 16,
-     fontWeight: 'bold' },
-
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 6,
-  },
-  cross: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: 'red',
-    borderRadius: 10,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-});
 
 export default EditProductForm;

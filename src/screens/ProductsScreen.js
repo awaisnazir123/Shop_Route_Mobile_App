@@ -1,9 +1,11 @@
 //import React from 'react';
-import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity,Alert } from 'react-native';
+import { View, Text,ScrollView, TouchableOpacity,Alert } from 'react-native';
 import axios from 'axios';
-import React, { useEffect, useState, useLayoutEffect } from 'react';
+import React, { useEffect, useState, useLayoutEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
-
+import {styles} from '../styles/productsScreen.style';
+import { BASE_URL } from '../utils/urlConfig';
 export default function ProductsScreen() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -31,14 +33,16 @@ export default function ProductsScreen() {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useFocusEffect(
+      useCallback(() => {
+  
+        fetchProducts();
+      }, [])
+    );
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://192.168.0.194:5000/api/product');
-      //console.log(JSON.stringify(response.data.response, null, 2));
+      const response = await axios.get(`${BASE_URL}/api/product`);
       setProducts(response.data.response);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -49,8 +53,9 @@ export default function ProductsScreen() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://192.168.0.194:5000/api/category');
-      setCategories(res.data);
+      const res = await axios.get(`${BASE_URL}/api/category`);
+      
+      setCategories(res.data.response);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -82,10 +87,10 @@ export default function ProductsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const productRes= await axios.delete(`http://192.168.0.194:5000/api/product/${productId}`);
+              const productRes= await axios.delete(`${BASE_URL}/api/product/${productId}`);
               for (const imageUrl of images) {
                 const filename = imageUrl.split('/').pop();
-                await axios.delete(`http://192.168.0.194:5000/api/upload/${filename}`);
+                await axios.delete(`${BASE_URL}/api/upload/${filename}`);
               }
               Alert.alert('Success', productRes.data.message);
               fetchProducts(); // Refresh list
@@ -120,7 +125,7 @@ export default function ProductsScreen() {
         <View>
           {/* Table Header */}
           <View style={[styles.row, styles.headerRow]}>
-            {['Name', 'Price', 'Category', 'Subcategory', 'Created At','Actions'].map((heading, index) => (
+            {['Name', 'Price(PKR)', 'Category', 'Subcategory','Actions'].map((heading, index) => (
               <Text
                 key={index}
                 style={[styles.cell, styles.headerText]}
@@ -139,12 +144,10 @@ export default function ProductsScreen() {
           {products.map((item) => (
             <View key={item._id} style={styles.row}>
               <Text style={styles.cell}>{item.name}</Text>
-              <Text style={styles.cell}>${item.price}</Text>
+              <Text style={styles.cell}>{item.price.toLocaleString('en-PK')}</Text>
               <Text style={styles.cell}>{getCategoryName(item.category)}</Text>
               <Text style={styles.cell}>{getSubcategoryName(item.category, item.subcategory)}</Text>
-              <Text style={styles.cell}>
-                {new Date(item.createdAt).toLocaleDateString('en-GB')}
-              </Text>
+              
 
               <TouchableOpacity
               style={{
@@ -181,56 +184,3 @@ export default function ProductsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  headerRow: {
-    backgroundColor: '#f0f0f0',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  cell: {
-    width: 100,  // ✅ fix width to stop breaking
-    fontSize: 14,
-    color: '#555',
-    paddingHorizontal: 5,
-  },
-  headerText: {
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerButton: {
-  backgroundColor: '#007bff',
-  paddingVertical: 6,
-  paddingHorizontal: 12,
-  borderRadius: 20,
-  marginRight: 10,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.2,
-  shadowRadius: 2,
-  elevation: 3,
-},
-headerButtonText: {
-  color: '#fff',
-  fontWeight: 'bold',
-  fontSize: 14,
-},
-
-});

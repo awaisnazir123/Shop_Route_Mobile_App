@@ -1,5 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useState, useEffect } from 'react';
+import {styles} from '../styles/addProductForm.style'
+import { BASE_URL } from '../utils/urlConfig';
 import {
   View,
   TextInput,
@@ -40,8 +42,8 @@ export default function AddProductForm() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get('http://192.168.0.194:5000/api/category');
-        setCategories(res.data);
+        const res = await axios.get(`${BASE_URL}/api/category`);
+        setCategories(res.data.response);
       } catch (error) {
         console.error('Error fetching categories:', error);
         Alert.alert('Error', 'Failed to fetch categories');
@@ -94,7 +96,7 @@ export default function AddProductForm() {
           });
         });
 
-        const uploadRes = await axios.post('http://192.168.0.194:5000/api/upload', imageForm, {
+        const uploadRes = await axios.post(`${BASE_URL}/api/upload`, imageForm, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
 
@@ -114,7 +116,7 @@ export default function AddProductForm() {
 
       
 
-      const res=await axios.post('http://192.168.0.194:5000/api/product', productData);
+      const res=await axios.post(`${BASE_URL}/api/product`, productData);
 
       Alert.alert('Success',res.data.message);
       setName('');
@@ -222,24 +224,4 @@ export default function AddProductForm() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { paddingBottom: 40, paddingHorizontal: 16 },
-  label: { marginTop: 12, fontWeight: '600', fontSize: 16 },
-  input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, marginTop: 6,
-  },
-  pickerContainer: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 10, marginTop: 6,
-  },
-  imagePicker: {
-    marginTop: 10, padding: 12, backgroundColor: '#f0f0f0',
-    borderRadius: 10, alignItems: 'center', flex: 1, marginHorizontal: 4,
-  },
-  imagePickerText: { color: '#333' },
-  button: {
-    marginTop: 20, backgroundColor: '#007bff',
-    paddingVertical: 14, borderRadius: 10, alignItems: 'center',
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-});
+

@@ -1,30 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet,ScrollView } from 'react-native';
+import {styles} from '../styles/addAreaScreen.style'
+import AddAreaForm from '../components/AddAreaForm';
 
 export default function AddAreaScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Add Area</Text>
-      <Text style={styles.subtext}>This is where you will add a new area.</Text>
-    </View>
+   <ScrollView 
+   style={styles.container}
+    contentContainerStyle={styles.contentContainer}
+    >
+      <Text style={styles.title}>Add New Area</Text>
+      <AddAreaForm />
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtext: {
-    fontSize: 16,
-    color: '#666',
-  },
-});
+

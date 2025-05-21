@@ -1,13 +1,45 @@
 // src/components/RegisterForm.js
 import React from 'react';
 import { Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { styles } from '../styles/styles'; // Importing styles
+import { useNavigation } from '@react-navigation/native';
+import validator from 'validator';
+import emojiRegex from 'emoji-regex';
+const emoji_pattern = emojiRegex();
+import { styles } from '../styles/signIn.style'; // Importing styles
+import { BASE_URL } from '../utils/urlConfig';
+
 
 export default function RegisterForm({ form, setForm }) {
-
+  const navigation = useNavigation();
   const handleRegister = () => {
-  
-    fetch('http://192.168.0.194:5000/api/auth/register', {
+    const { username, email, password } = form;
+    const regex = emojiRegex();
+
+    if (
+      !validator.isLength(username, { min: 3 }) ||
+      !/^[a-zA-Z0-9_]+$/.test(username) ||
+      emoji_pattern.test(username)
+    ) {
+      Alert.alert('Invalid Username', 'Username must be at least 3 characters long, contain only letters and numbers not spaces, emojis and special characters.');
+      return;
+    }
+
+    if (!validator.isEmail(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+    }
+
+    if (!validator.isStrongPassword(password, {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    })) {
+      Alert.alert('Weak Password', 'Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol.');
+      return;
+    }
+
+    fetch(`${BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,32 +50,37 @@ export default function RegisterForm({ form, setForm }) {
         password: form.password,
       }),
     })
-    .then(async (res) => {
-      const text = await res.text();
-      try {
-        const data = JSON.parse(text);
-        if (res.ok) {
-          Alert.alert('Success', data.message || 'User registered successfully!');
-        } else {
-          Alert.alert('Error', data.message || 'Something went wrong.');
+      .then(async (res) => {
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          if (res.ok) {
+            Alert.alert('Success', data.message || 'User registered successfully!', [
+              {
+                text: 'OK',
+                onPress: () => navigation.navigate('SignInScreen'), // Navigate here
+              },
+            ]);
+          } else {
+            Alert.alert('Error', data.message || 'Something went wrong.');
+          }
+        } catch (err) {
+          console.error('Invalid JSON:', text);
+          Alert.alert('Error', 'Server did not return valid data.');
         }
-      } catch (err) {
-        console.error('Invalid JSON:', text);
-        Alert.alert('Error', 'Server did not return valid data.');
-      }
-    })
-    .catch((err) => {
-      console.error('Network error:', err.message);
-      Alert.alert('Error', 'Could not connect to server.');
-    });
-    
+      })
+      .catch((err) => {
+        console.error('Network error:', err.message);
+        Alert.alert('Error', 'Could not connect to server.');
+      });
+
   };
 
   return (
     <View style={styles.form}>
       {/* First Name Input */}
       <View style={styles.input}>
-        <Text style={styles.inputLabel}>User Name</Text>
+        <Text style={styles.inputLabel}>Username</Text>
         <TextInput
           autoCapitalize="words"
           autoCorrect={false}
@@ -53,9 +90,10 @@ export default function RegisterForm({ form, setForm }) {
           style={styles.inputControl}
           value={form.username}
         />
+
       </View>
 
-      
+
 
       {/* Email Input */}
       <View style={styles.input}>
@@ -88,12 +126,18 @@ export default function RegisterForm({ form, setForm }) {
 
       {/* Register Button */}
       <View style={styles.formAction}>
-        <TouchableOpacity onPress= { handleRegister }>
+        <TouchableOpacity onPress={handleRegister}>
           <View style={styles.btn}>
             <Text style={styles.btnText}>Register</Text>
           </View>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
+        <Text style={{ color: 'blue', marginTop: 20, textAlign: 'center' }}>
+          Already have an account? Sign In
+        </Text>
+      </TouchableOpacity>
+
     </View>
   );
 }

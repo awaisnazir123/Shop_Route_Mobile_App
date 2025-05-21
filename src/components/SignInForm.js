@@ -3,12 +3,12 @@ import { Alert,Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from '../styles/signIn.style'; // Importing styles
-
+import {BASE_URL} from '../utils/urlConfig';
 export default function SignInForm({ form, setForm }) {
   const navigation = useNavigation();
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.0.194:5000/api/auth/login', {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,6 +24,7 @@ export default function SignInForm({ form, setForm }) {
       if (response.ok) {
         //Alert.alert('Login Successful', `Token: ${data.token}`);
         await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('username', form.username);
         //navigation.navigate('DashboardScreen');
         navigation.navigate('Main');
         // You can store the token using AsyncStorage or navigate to another screen

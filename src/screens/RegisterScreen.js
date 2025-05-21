@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
 import RegisterForm from '../components/RegisterForm'; // Importing the RegisterForm component
-import { styles } from '../styles/styles'; // Importing global styles
+import { styles } from '../styles/register.style'; // Importing global styles
 
 export default function RegisterScreen() {
   const [form, setForm] = useState({
