@@ -1,4 +1,7 @@
 {
   "name": "main",
-  "displayName": "om_system"
+  "displayName": "om_system",
+  "android": {
+    "package": "com.anonymous.main"
+  }
 }

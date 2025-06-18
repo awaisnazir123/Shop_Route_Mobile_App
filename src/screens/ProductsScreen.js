@@ -70,12 +70,12 @@ export default function ProductsScreen() {
     const cat = categories.find((c) => c._id === id);
     return cat ? cat.name : '-';
   };
-  
+  /*
   const getSubcategoryName = (categoryId, sub) => {
-    const cat = categories.find((c) => c._id === categoryId);
+    const cat = categories.find((c) => c._id === categoryId); old logic for getting sub category
     return cat?.subcategories?.includes(sub) ? sub : '-';
   };
-  
+  */
   const handleDelete = async (productId, images = []) => {
     Alert.alert(
       'Confirm Deletion',
@@ -114,7 +114,7 @@ export default function ProductsScreen() {
   }
 
   
-  
+  // console.log(products.[0].categories.subcategories[]);
   
 
   return (
@@ -145,10 +145,10 @@ export default function ProductsScreen() {
             <View key={item._id} style={styles.row}>
               <Text style={styles.cell}>{item.name}</Text>
               <Text style={styles.cell}>{item.price.toLocaleString('en-PK')}</Text>
-              <Text style={styles.cell}>{getCategoryName(item.category)}</Text>
-              <Text style={styles.cell}>{getSubcategoryName(item.category, item.subcategory)}</Text>
+              <Text style={styles.cell}>{getCategoryName(item.category._id)}</Text>
+             <Text style={styles.cell}>{item.category.subcategories[0]}</Text>
               
-
+            {/* <Text style={styles.cell}>{getSubcategoryName(item.category, item.subcategory)}</Text> old logic for showing sub category*/}
               <TouchableOpacity
               style={{
                 backgroundColor: 'red',

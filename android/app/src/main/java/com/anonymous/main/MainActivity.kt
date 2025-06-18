@@ -1,4 +1,4 @@
-package com.om_system
+package com.anonymous.main
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

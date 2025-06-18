@@ -1,4 +1,4 @@
-package com.om_system
+package com.anonymous.main
 
 import android.app.Application
 import com.facebook.react.PackageList

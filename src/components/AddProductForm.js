@@ -2,16 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useState, useEffect } from 'react';
 import {styles} from '../styles/addProductForm.style'
 import { BASE_URL } from '../utils/urlConfig';
-import {
-  View,
-  TextInput,
-  Text,
-  Alert,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import {View,TextInput,Text,Alert,TouchableOpacity,Image,ScrollView} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 

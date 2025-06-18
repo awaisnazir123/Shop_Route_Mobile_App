@@ -133,7 +133,7 @@ export default function AreasScreen() {
             <View key={item._id} style={styles.row}>
               <View style={{ flex: 1, paddingLeft: 10 }}>
                 <Text style={styles.cell}>{item.name}</Text>
-                <Text style={styles.citycell}>{getCityName(item.city)}</Text>
+                <Text style={styles.citycell}>{getCityName(item.city._id)}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity

@@ -133,8 +133,8 @@ export default function ShopScreen() {
               <View key={shop._id} style={styles.row}>
                 <Text style={styles.cell}>{shop.name}</Text>
                 <Text style={styles.cell}>{shop.contact}</Text>
-                <Text style={styles.cell}>{getCityName(shop.city)}</Text>
-                <Text style={styles.cell}>{getAreaName(shop.area)}</Text>
+                <Text style={styles.cell}>{getCityName(shop.city._id)}</Text>
+                <Text style={styles.cell}>{getAreaName(shop.area._id)}</Text>
 
                 <View style={{ flexDirection: 'row' }}>
                   <TouchableOpacity

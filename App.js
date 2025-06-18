@@ -6,26 +6,22 @@ import RegisterScreen from './src/screens/RegisterScreen'
 //import DashboardScreen from './src/screens/DashboardScreen';
 //import OrdersScreen from './src/screens/OrderScreen';
 import DrawerNavigator from './src/navigation/DrawerNavigator';
+import { MenuProvider } from 'react-native-popup-menu';
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    
+     <MenuProvider>
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="SignInScreen"
         screenOptions={{ headerShown: false }}
-      >
-       {/* <Stack.Screen name="Register" component={RegisterScreen}/> */} 
-        
+      > 
         <Stack.Screen name="RegisterScreen" component={RegisterScreen}/>
         <Stack.Screen name="SignInScreen" component={SignInScreen}/>
-         <Stack.Screen name="Main" component={DrawerNavigator} />  
-       {/* <Stack.Screen name="DashboardScreen" component={DashboardScreen}/> */}
-        
-       {/* <Stack.Screen name="OrderScreen" component={OrdersScreen}/> */}
+        <Stack.Screen name="Main" component={DrawerNavigator} />   
       </Stack.Navigator>
     </NavigationContainer>
-    
+    </MenuProvider>
   );
 }

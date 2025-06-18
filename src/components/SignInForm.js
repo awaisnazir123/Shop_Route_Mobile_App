@@ -1,9 +1,13 @@
 import React from 'react';
-import { Alert,Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from '../styles/signIn.style'; // Importing styles
-import {BASE_URL} from '../utils/urlConfig';
+import { BASE_URL } from '../utils/urlConfig';
+import { parseJwt } from '../utils/jwtUtils';
+
+
+
 export default function SignInForm({ form, setForm }) {
   const navigation = useNavigation();
   const handleLogin = async () => {
@@ -20,14 +24,26 @@ export default function SignInForm({ form, setForm }) {
       });
 
       const data = await response.json();
+     
 
       if (response.ok) {
-        //Alert.alert('Login Successful', `Token: ${data.token}`);
-        await AsyncStorage.setItem('userToken', data.token);
+
+        const { token } = data;
+        
+        const decoded = parseJwt(token);
+        const userId = decoded?.userId;
+        const role = decoded?.role;
+        const isAccess = decoded?.isAccess;
+
+        await AsyncStorage.setItem('userToken', token);
         await AsyncStorage.setItem('username', form.username);
-        //navigation.navigate('DashboardScreen');
+        await AsyncStorage.setItem('userId', userId);
+        await AsyncStorage.setItem('role', role?.toLowerCase());
+        await AsyncStorage.setItem('access', isAccess === 'true' ? 'true' : 'false');
+
+        const storedUserId = await AsyncStorage.getItem('userId');
+        
         navigation.navigate('Main');
-        // You can store the token using AsyncStorage or navigate to another screen
       } else {
         Alert.alert('Login Failed', data.message || 'Invalid credentials');
       }
@@ -35,9 +51,9 @@ export default function SignInForm({ form, setForm }) {
       Alert.alert('Error', 'An error occurred during login');
       console.error('Login error:', error);
     }
-    
-
   };
+
+
 
   return (
     <View style={styles.form}>
@@ -79,7 +95,7 @@ export default function SignInForm({ form, setForm }) {
         </TouchableOpacity>
       </View>
 
-    
+
     </View>
   );
 }

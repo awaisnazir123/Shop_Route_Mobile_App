@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import EditShopForm from '../components/EditShopForm';
-import { styles } from '../styles/editShopScreen.style';
+
 
 export default function EditShopScreen({ route, navigation }) {
   const { shop, onShopUpdated } = route.params;
